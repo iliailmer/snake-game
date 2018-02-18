@@ -2,6 +2,7 @@ import pygame
 import sys
 from pygame.locals import *
 import random
+import keyboard
 
 WIDTH = 800
 HEIGHT = 600
@@ -23,6 +24,9 @@ DOWN = 'down'
 LEFT = 'left'
 RIGHT = 'right'
 
+Directions = [UP, DOWN, LEFT, RIGHT]
+dictDirections = {LEFT: 'a', UP: 'w', DOWN: 's', RIGHT: 'd'}
+
 
 def main():
     global DISPLAY, CLOCK, BASICFONT
@@ -32,7 +36,7 @@ def main():
     BASICFONT = pygame.font.Font('freesansbold.ttf', 18)
     pygame.display.set_caption('Snake')
 
-    gameScreen()
+    # gameScreen()
     while True:
         runGame()
         finishGame()
@@ -70,6 +74,34 @@ def checkPressedKey():
     return keyUpEvents[0].key
 
 
+def UP(snake):
+    keyboard.press_and_release('w')
+    snake.insert(0, {'x': snake[0]['x'], 'y': snake[0]['y'] - 1})
+    del snake[-1]
+    # direction = UP
+
+
+def DOWN(snake):
+    keyboard.press_and_release('s')
+    snake.insert(0, {'x': snake[0]['x'], 'y': snake[0]['y'] + 1})
+    del snake[-1]
+    # direction = DOWN
+
+
+def RIGHT(snake):
+    keyboard.press_and_release('d')
+    snake.insert(0, {'x': snake[0]['x'] + 1, 'y': snake[0]['y']})
+    del snake[-1]
+    # direction = RIGHT
+
+
+def LEFT(snake):
+    keyboard.press_and_release('a')
+    snake.insert(0, {'x': snake[0]['x'] - 1, 'y': snake[0]['y']})
+    del snake[-1]
+    # direction = LEFT
+
+
 def runGame():
     startX = random.randint(5, CELLWIDTH - 6)
     startY = random.randint(5, CELLHEIGHT - 6)
@@ -78,7 +110,8 @@ def runGame():
              {'x': startX - 2, 'y': startY}]
 
     apple = {'x': random.randint(0, CELLWIDTH - 1), 'y': random.randint(0, CELLHEIGHT - 1)}
-    direction = None
+    direction = randomDirection(Directions)
+    print(direction)
     # main game loop goes here
     while True:
         for event in pygame.event.get():
@@ -88,35 +121,39 @@ def runGame():
                 if (event.key == K_LEFT or event.key == K_a) and direction != RIGHT:
                     if metApple(snake, apple):
                         apple = {'x': random.randint(0, CELLWIDTH - 1), 'y': random.randint(0, CELLHEIGHT - 1)}
-                        snake.insert(len(snake)-1, {'x': apple['x']+snake[0]['x'], 'y': apple['y']+snake[0]['y']})
+                        snake.insert(len(snake) - 1, {'x': apple['x'] + snake[0]['x'], 'y': apple['y'] + snake[0]['y']})
                     else:
+                        # snake.insert(0, {'x': snake[0]['x'] - 1, 'y': snake[0]['y']})
+                        # del snake[-1]
+                        LEFT(snake)
                         direction = LEFT
-                        snake.insert(0, {'x': snake[0]['x'] - 1, 'y': snake[0]['y']})
-                        del snake[-1]
                 elif (event.key == K_RIGHT or event.key == K_d) and direction != LEFT:
                     if metApple(snake, apple):
                         apple = {'x': random.randint(0, CELLWIDTH - 1), 'y': random.randint(0, CELLHEIGHT - 1)}
                         snake.insert(len(snake) - 1, {'x': apple['x'] + snake[0]['x'], 'y': apple['y'] + snake[0]['y']})
                     else:
+                        RIGHT(snake)
                         direction = RIGHT
-                        snake.insert(0, {'x': snake[0]['x'] + 1, 'y': snake[0]['y']})
-                        del snake[-1]
+                        # snake.insert(0, {'x': snake[0]['x'] + 1, 'y': snake[0]['y']})
+                        # del snake[-1]
                 elif (event.key == K_UP or event.key == K_w) and direction != DOWN:
                     if metApple(snake, apple):
                         apple = {'x': random.randint(0, CELLWIDTH - 1), 'y': random.randint(0, CELLHEIGHT - 1)}
                         snake.insert(len(snake) - 1, {'x': apple['x'] + snake[0]['x'], 'y': apple['y'] + snake[0]['y']})
                     else:
+                        UP(snake)
                         direction = UP
-                        snake.insert(0, {'x': snake[0]['x'], 'y': snake[0]['y'] - 1})
-                        del snake[-1]
+                        # snake.insert(0, {'x': snake[0]['x'], 'y': snake[0]['y'] - 1})
+                        # del snake[-1]
                 elif (event.key == K_DOWN or event.key == K_s) and direction != UP:
                     if metApple(snake, apple):
                         apple = {'x': random.randint(0, CELLWIDTH - 1), 'y': random.randint(0, CELLHEIGHT - 1)}
                         snake.insert(len(snake) - 1, {'x': apple['x'] + snake[0]['x'], 'y': apple['y'] + snake[0]['y']})
                     else:
+                        DOWN(snake)
                         direction = DOWN
-                        snake.insert(0, {'x': snake[0]['x'], 'y': snake[0]['y'] + 1})
-                        del snake[-1]
+                        # snake.insert(len(snake) - 1, {'x': snake[0]['x'], 'y': snake[0]['y'] + 1})
+                        # del snake[-1]
                 elif event.key == K_ESCAPE:
                     terminate()
 
@@ -128,26 +165,6 @@ def runGame():
             if wormBody['x'] == snake[0]['x'] and wormBody['y'] == snake[0]['y']:
                 return
 
-        # snake arrives at apple
-        # if snake[0]['x'] == apple['x'] and snake[0]['y'] == apple['y']:
-        #    apple = {'x': random.randint(0, CELLWIDTH - 1), 'y': random.randint(0, CELLHEIGHT - 1)}
-        #    snake.insert(len(snake)-1, {'x': snake[0]['x'], 'y': snake[0]['y'] - 1})
-        # else:
-        #   del snake[-1]  # remove snakes' tail segment
-        """
-        if direction == UP:
-            snake.insert(0, {'x': snake[0]['x'], 'y': snake[0]['y'] + 1})
-            del snake[-1]
-        elif direction == DOWN:
-            snake.insert(0, {'x': snake[0]['x'], 'y': snake[0]['y'] - 1})
-            del snake[-1]
-        elif direction == LEFT:
-            snake.insert(0, {'x': snake[0]['x'] - 1, 'y': snake[0]['y']})
-            del snake[-1]
-        elif direction == RIGHT:
-            snake.insert(0, {'x': snake[0]['x'] + 1, 'y': snake[0]['y']})
-            del snake[-1]
-        """
         DISPLAY.fill(BGCOLOR)
         drawGrid()
         drawWorm(snake)
@@ -155,6 +172,7 @@ def runGame():
         drawScore(len(snake) - 3)
         pygame.display.update()
         CLOCK.tick(15)
+        print(direction)
 
 
 def drawGrid():
@@ -174,9 +192,9 @@ def drawWorm(coords):
         pygame.draw.rect(DISPLAY, GREEN, wormInnerSegmentRect)
 
 
-def drawApple(coord):
-    x = coord['x'] * CELLSIZE
-    y = coord['y'] * CELLSIZE
+def drawApple(coordApple):
+    x = coordApple['x'] * CELLSIZE
+    y = coordApple['y'] * CELLSIZE
     appleRect = pygame.Rect(x, y, CELLSIZE, CELLSIZE)
     pygame.draw.rect(DISPLAY, RED, appleRect)
 
@@ -217,6 +235,11 @@ def metApple(snake, apple):
         return True
     else:
         return False
+
+
+def randomDirection(Directions):
+    dir_index = random.randint(0, 3)
+    return Directions[dir_index]
 
 
 if __name__ == '__main__':
